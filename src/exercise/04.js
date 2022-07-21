@@ -1,34 +1,29 @@
+import { json } from "msw/lib/types/context";
 import { useEffect, useState } from "react";
 
-/* 
-  the two parameters for this function are: 
-  - key: the key on localStorage where we are saving this data
-  - initialValue: the initial value of state
-*/
-export function useLocalStorage(key, initialValue) {
-  /* 
-    ✅ in this hook, use the useState hook. For the initial value for state:
-    use the value saved in localStorage OR the initialValue from the function parameters 
-  */
+function getLocalStorageData(key) {
+  const stringifiedValue = localStorage.getItem(key);
+  return json.parse(stringifiedValue);
+}
+function setLocalStorageData(key, value) {
+  const stringifiedValue = json.stringify(value);
+  localStorage.setItem(key, stringifiedValue);
+}
 
-  /* 
-   ✅ write a useEffect hook 
-   in the useEffect, when state is updated, save the state to localStorage
-   don't forget the dependencies array!
-  */
-  useEffect(() => {});
+export function useLocalStorage(key, initialValue = null) {
+  const [state, setState] = useState(getLocalStorageData(key) || initialValue);
 
-  /* 
-   ✅ return the same interface as useState:
-   an array with state and a setState function
-  */
-  // 👀 return [state, setState]
+  useEffect(() => {
+    setLocalStorageData(key, state);
+  }, [key, state]);
+
+  return [state, setState];
 }
 
 function Form() {
   // ✅ after implementing the useLocalStorage hook, replace useState with useLocalStorage
   // don't forget to pass in both arguments (a key and an initialValue)
-  const [name, setName] = useState("");
+  const [name, setName] = useLocalStorage("name", "");
   console.log(name);
 
   return (
